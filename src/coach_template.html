@@ -165,7 +165,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{o
   <details class="sec" id="s-velo"><summary><h2>Velo &amp; grades</h2><span class="sm" id="veloSum"></span></summary><div class="body" id="velo"></div></details>
   <details class="sec" id="s-focus"><summary><h2>My focus cards</h2><span class="sm" id="focusSum"></span></summary><div class="body" id="focus"></div></details>
   <details class="sec" id="s-dates"><summary><h2>Key dates</h2><span class="sm" id="datesSum"></span></summary><div class="body" id="dates"></div></details>
-  <details class="sec" id="s-roster"><summary><h2>Roster</h2><span class="sm">11 players</span></summary><div class="body" id="roster"></div></details>
+  <details class="sec" id="s-roster"><summary><h2>Roster</h2><span class="sm" id="rosterSum">11 players</span></summary><div class="body" id="roster"></div></details>
 </div>
 
 <script>
@@ -278,7 +278,22 @@ function renderVelo(){const rows=C.kids.map(k=>{const v=C.velo[k.s]||[],g=gradeS
   $("velo").innerHTML=`${anyV?"":`<div class="hsub">Velo fills in after the Nov 25 test, then every Wednesday from Dec 30. Grades fill in as you grade.</div>`}<div class="tscroll"><table class="dt"><thead><tr><th>Player</th><th>Start</th><th>Last</th><th>Best</th><th>Gain</th><th>Grade avg</th><th>Last 4</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.k.l)}${r.k.cat?" (C)":""}</td><td>${r.f?r.f.top:"–"}</td><td>${r.l?r.l.top:"–"}</td><td>${r.best??"–"}</td><td style="color:${r.gain>0?"var(--good)":r.gain<0?"#ff7b7f":"inherit"}">${r.gain==null?"–":(r.gain>0?"+":"")+r.gain}</td><td>${r.g.avg??"–"}</td><td class="${r.g.last4!=null&&r.g.last4<3?"bad":""}">${r.g.last4??"–"}</td></tr>`).join("")}</tbody></table></div><div class="hsub">Velo = top fastball (throwdown for catchers). Last 4 under 3.0 shows in red.</div>`}
 
 /* ---------- roster & dates ---------- */
-function renderRoster(){$("roster").innerHTML=`<div class="tscroll"><table class="dt"><thead><tr><th>Player</th><th>Tier</th><th>Wed</th><th>Sat</th><th>First pen</th></tr></thead><tbody>${C.kids.map(k=>`<tr><td><a href="${esc(k.url)}" target="_blank" rel="noopener">${esc(k.f+" "+k.l)}</a></td><td>${k.tier}${k.cat?" · C":""}</td><td>${esc(k.wed.replace("pm",""))}</td><td>${esc(k.sat.replace("am",""))}</td><td>${k.cat?"Throwdowns "+fmt("2026-12-30"):fmt(k.firstpen)}</td></tr>`).join("")}</tbody></table></div><div class="hsub">Tap a name to open his page.</div>`}
+let sent={};
+function msgFor(k){return `Hi ${k.f}! Here's your Scorps Throwing plan: ${k.url}
+
+Save it like an app: open the link in Safari, tap Share, then Add to Home Screen. (Android: Chrome, tap the 3 dots, then Add to Home screen.)
+
+Every Wednesday and Saturday, tap the purple CHECK IN bar before you throw and CHECK OUT when you're done. Pain 3 or higher? Tell me before you throw.
+
+Your Wednesday group is ${k.wed}. First session is Wednesday, Nov 4. See you there!
+- Coach Brooks`}
+function renderRoster(){const n=C.kids.filter(k=>sent[k.s]).length;$("rosterSum").textContent=n+" / "+C.kids.length+" links sent";
+  $("roster").innerHTML=`<div class="hsub">Tap <b>Copy text</b>, paste it into a text to the kid or a parent, then tap <b>Sent</b>.</div>`+C.kids.map(k=>`<div class="gr"><div class="nm"><a href="${esc(k.url)}" target="_blank" rel="noopener">${esc(k.f+" "+k.l)}</a><small>Tier ${k.tier}${k.cat?" · C":""} · Wed ${esc(k.wed)} · Sat ${esc(k.sat)}${sent[k.s]?" · sent "+fmt(sent[k.s]):""}</small></div><div class="g5"><button type="button" class="btn" style="width:auto;height:auto;padding:8px 10px;font:700 13px var(--body)" data-copy="${k.s}">Copy text</button><button type="button" aria-pressed="${!!sent[k.s]}" style="width:auto;padding:0 10px;font:700 13px var(--body)" data-sent="${k.s}" ${db?"":"disabled"}>${sent[k.s]?"✓ Sent":"Sent"}</button></div><textarea id="msg-${k.s}" class="gn" readonly hidden style="width:100%;min-height:150px;background:var(--panel2);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:8px;font:14px var(--body)">${esc(msgFor(k))}</textarea></div>`).join("")+`<div class="btnrow"><span class="status" id="rstat"></span></div>`;
+  $("roster").querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>{const k=KID[b.dataset.copy],t=msgFor(k),ta=$("msg-"+k.s);const st=$("rstat");
+    const fall=()=>{ta.hidden=false;ta.focus();ta.select();st.textContent="Copy didn't work here. The text is open below his name: select it and copy.";st.className="status"};
+    try{navigator.clipboard.writeText(t).then(()=>{b.textContent="✓ Copied";st.textContent="Copied "+k.f+"'s text. Paste it into Messages.";st.className="status ok";setTimeout(()=>{b.textContent="Copy text"},2500)},fall)}catch(e){fall()}});
+  $("roster").querySelectorAll("[data-sent]").forEach(b=>b.onclick=async()=>{const s=b.dataset.sent,n={...sent};if(n[s])delete n[s];else n[s]=TODAY;sent=n;renderRoster();
+    try{await db.doc("meta/sent").set({sent:n,at:new Date().toISOString()})}catch(e){const st=$("rstat");if(st){st.textContent="Couldn't save. Check your connection, then tap again.";st.className="status bad"}}})}
 function renderDates(){const nx=C.dates.find(x=>x.d>=TODAY);$("datesSum").textContent=nx?"Next: "+fmt(nx.d):"";
   $("dates").innerHTML=`<div class="legend"><span><i class="ball" style="background:var(--fg)"></i>Big day</span><span><i class="ball" style="background:#4fc3b0"></i>Light week</span><span><i class="ball" style="background:var(--amber)"></i>Pat out</span></div><div class="dl">${C.dates.map(x=>`<div class="di ${x.k} ${x.d<TODAY?"past":""} ${x===nx?"next":""}"><div class="d">${fmt(x.d)}</div><div class="t">${esc(x.t)}</div></div>`).join("")}</div>`}
 
@@ -292,6 +307,7 @@ renderAll();renderFocus();renderCheck();renderRoster();renderDates();
   renderChart();renderGrade();
   db.collection("pens").onSnapshot(s=>{const n={};s.docs.forEach(d=>{if(d.exists)n[d.id]=d.data()});Object.keys(queue).forEach(k=>{if(pens[k])n[k]=pens[k]});pens=n;
     const a=document.activeElement;if(a&&a.id==="velo-in")return;renderToday();renderChart();renderRecap()},()=>{});
+  db.doc("meta/sent").onSnapshot(d=>{sent=(d.exists&&d.data().sent)||{};const a=document.activeElement;if(!(a&&a.closest&&a.closest("#roster")))renderRoster()},()=>{});
   db.collection("grades").onSnapshot(s=>{const n={};s.docs.forEach(d=>{if(d.exists)n[d.id]=d.data()});Object.keys(queue).forEach(k=>{if(k.startsWith("g_")&&grades[k.slice(2)])n[k.slice(2)]=grades[k.slice(2)]});grades=n;
     const a=document.activeElement;if(!(a&&a.closest&&a.closest("#grade")))renderGrade();renderVelo()},()=>{});
 })();
