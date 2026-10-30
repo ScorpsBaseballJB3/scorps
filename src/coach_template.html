@@ -1,0 +1,298 @@
+<title>Scorps Coach</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: one phone column, session-first. Today card, live pen chart, grades, then reference sections. Dark-only Scorps look by design, matching the player pages. */
+:root{
+  --ink:#0c0a11; --panel:#16131e; --panel2:#1f1a2b; --line:#2d2640; --fg:#f2eff8; --muted:#a49eb5; --silver:#cfccd8;
+  --scorp:#9b6ce0; --scorp-hi:#c3a2f5; --scorp-deep:#3a2363; --good:#4fc3b0; --warn:#ef6b6b; --amber:#d9a65b;
+  --b-kg:#4ade80;
+  --display:"Saira Condensed","Arial Narrow",Impact,sans-serif; --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--ink)}
+body{color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.45;margin:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 56px}
+.wrap{max-width:620px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+a{color:var(--scorp-hi)}
+header{display:flex;align-items:center;gap:14px}
+header img{width:76px;height:auto;flex:none}
+.brand{font-family:var(--display);font-weight:700;font-size:14px;letter-spacing:.22em;text-transform:uppercase;color:var(--scorp-hi)}
+.ttl{font-family:var(--display);font-weight:800;font-size:40px;line-height:.95;text-transform:uppercase}
+.hsub{font-size:13px;color:var(--muted)}
+.datebar{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:8px}
+.datebar button{flex:none;width:46px;height:46px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);color:var(--fg);font-size:22px;cursor:pointer}
+.datebar .mid{flex:1;text-align:center;min-width:0}
+.datebar .a{font-family:var(--display);font-weight:800;font-size:26px;line-height:1;text-transform:uppercase}
+.datebar .b{font-size:13px;color:var(--muted)}
+.todayb{border:1px solid var(--scorp);background:transparent;color:var(--scorp-hi);border-radius:999px;padding:4px 12px;font:700 12px var(--body);cursor:pointer;margin-top:4px}
+details.sec{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+details.sec>summary{list-style:none;cursor:pointer;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary h2{margin:0;font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:.05em;text-transform:uppercase}
+details.sec>summary .sm{font-size:13px;color:var(--muted);text-align:right;margin-left:auto}
+details.sec>summary::after{content:"+";color:var(--scorp-hi);font-size:28px;line-height:1;flex:none}
+details.sec[open]>summary::after{content:"–"}
+.body{padding:0 14px 16px;display:flex;flex-direction:column;gap:12px}
+.empty{color:var(--muted);font-size:15px}
+.grp{display:flex;flex-direction:column;gap:6px}
+.gh{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:.08em;text-transform:uppercase;color:var(--silver)}
+.gh small{font-family:var(--body);font-size:13px;letter-spacing:0;text-transform:none;color:var(--muted);font-weight:500}
+.krow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;background:var(--panel2);border-radius:12px;padding:10px 12px}
+.krow .nm{font-weight:600;font-size:17px}
+.krow .nm a{color:var(--fg);text-decoration:none}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.tag{font:600 12px var(--body);border-radius:999px;padding:2px 8px;border:1px solid var(--line);color:var(--silver);white-space:nowrap}
+.tag.t{border-color:#5a3a91;color:var(--scorp-hi)}
+.tag.pen{background:var(--scorp);border-color:var(--scorp);color:#160b28}
+.tag.mx{background:#e5484d;border-color:#e5484d;color:#fff}
+.tag.mb{border-color:var(--b-kg);color:var(--b-kg)}
+.tag.dn{background:var(--good);border-color:var(--good);color:#06201b}
+.eff{font-family:var(--display);font-weight:800;font-size:22px;font-variant-numeric:tabular-nums;color:var(--silver)}
+.eff.mx{color:#ff7b7f}
+.sumrow{display:flex;flex-wrap:wrap;gap:8px}
+.sumrow .tag{font-size:13px;padding:4px 10px}
+/* chart */
+.picker{display:flex;flex-wrap:wrap;gap:6px}
+.picker button{border:1px solid var(--line);background:var(--panel2);color:var(--fg);border-radius:999px;padding:8px 12px;font:600 14px var(--body);cursor:pointer;min-height:40px}
+.picker button small{color:var(--muted);font-weight:500;margin-left:4px}
+.picker button[aria-pressed="true"]{background:var(--scorp);border-color:var(--scorp);color:#160b28}
+.picker button[aria-pressed="true"] small{color:#2b1550}
+.picker button.has{box-shadow:inset 0 -3px 0 var(--good)}
+.cnt{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.cnt .big{font-family:var(--display);font-weight:800;font-size:44px;line-height:1;font-variant-numeric:tabular-nums}
+.cnt .big small{font-size:22px;color:var(--muted)}
+.cnt .who{font-family:var(--display);font-weight:700;font-size:22px;text-transform:uppercase;text-align:right}
+.cnt.over .big{color:#ff7b7f}
+.types{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.types button{border:2px solid var(--tc);background:var(--panel2);color:var(--fg);border-radius:12px;min-height:54px;font:800 20px var(--display);cursor:pointer;padding:2px}
+.types button small{display:block;font:600 10px var(--body);color:var(--muted)}
+.types button[aria-pressed="true"]{background:var(--tc);color:#160b28}
+.types button[aria-pressed="true"] small{color:#160b28}
+.ctl{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.ctl label{display:flex;flex-direction:column;gap:3px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.ctl input{font:700 26px var(--display);background:var(--panel2);color:var(--fg);border:1px solid var(--line);border-radius:12px;padding:6px 12px;width:100%;min-height:54px}
+.gmb{border:2px solid var(--good);background:transparent;color:var(--good);border-radius:12px;font:800 20px var(--display);text-transform:uppercase;cursor:pointer;min-height:54px;align-self:end}
+.gmb[aria-pressed="true"]{background:var(--good);color:#06201b}
+.zone{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;width:100%;max-width:360px;aspect-ratio:1/1;margin:0 auto}
+.zone button{border:0;border-radius:10px;background:var(--panel2);color:var(--muted);font:700 13px var(--body);cursor:pointer;min-width:0}
+.zone button.in{background:#2a2140;outline:2px solid #5a3a91;outline-offset:-2px;color:var(--fg);font:800 26px var(--display)}
+.zone button:active{background:var(--scorp);color:#160b28}
+.zone button:disabled{opacity:.4;cursor:default}
+.zhint{font-size:13px;color:var(--muted);text-align:center}
+.recent{display:flex;flex-wrap:wrap;gap:5px}
+.pchip{display:inline-flex;align-items:center;gap:5px;background:var(--panel2);border-radius:8px;padding:4px 8px;font:600 13px var(--body);font-variant-numeric:tabular-nums}
+.pchip i{width:9px;height:9px;border-radius:50%}
+.pchip.k{outline:1px solid #5a3a91}
+.pchip.g{outline:1px solid var(--good)}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{border:1px solid var(--line);background:var(--panel2);color:var(--fg);border-radius:12px;padding:10px 16px;font:700 15px var(--body);cursor:pointer;min-height:44px}
+.btn.warn{border-color:var(--warn);color:var(--warn)}
+.status{font-size:14px;color:var(--muted)}
+.status.ok{color:var(--good)}.status.bad{color:var(--warn)}
+.note{background:var(--panel2);border:1px dashed #5a3a91;border-radius:12px;padding:10px 12px;font-size:14px;color:var(--silver)}
+/* grades */
+.gr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.gr:first-of-type{border-top:0}
+.gr .nm{font-weight:600}
+.gr .nm small{display:block;color:var(--muted);font-weight:500;font-size:12px}
+.g5{display:flex;gap:4px}
+.g5 button{width:42px;height:42px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--fg);font:800 20px var(--display);cursor:pointer}
+.g5 button[aria-pressed="true"]{background:var(--scorp);border-color:var(--scorp);color:#160b28}
+.gn{grid-column:1/-1}
+.gn input{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--fg);font:500 15px var(--body);padding:8px 10px}
+/* tables */
+.tscroll{overflow-x:auto}
+table.dt{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:15px}
+table.dt th{font:600 11px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:right;padding:6px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.dt td{text-align:right;padding:8px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.dt th:first-child,table.dt td:first-child{text-align:left}
+table.dt tr:last-child td{border-bottom:0}
+.bad{color:#ff7b7f;font-weight:700}
+/* focus */
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px}
+.fc{background:var(--panel2);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.fc .who{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--scorp-hi);font-weight:600}
+.fc .cue{font-family:var(--display);font-weight:800;font-size:22px;line-height:1.05;text-transform:uppercase}
+.fc.wait .cue{color:var(--muted);font-size:18px}
+.fc .why{font-size:14px;color:var(--silver)}
+.fc ul{margin:0;padding-left:18px;font-size:14px}
+.focus{display:none}
+/* dates */
+.dl{display:flex;flex-direction:column}
+.di{display:grid;grid-template-columns:76px minmax(0,1fr);gap:10px;padding:9px 0;border-top:1px solid var(--line);align-items:baseline}
+.di:first-child{border-top:0}
+.di .d{font-family:var(--display);font-weight:700;font-size:18px;color:var(--silver);font-variant-numeric:tabular-nums}
+.di.big .t{font-weight:600}
+.di.light .t{color:#4fc3b0}
+.di.pat .t{color:var(--amber)}
+.di.past{opacity:.4}
+.di.next{background:var(--scorp-deep);border-radius:10px;padding:9px 8px;border-top-color:transparent}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.ball{width:12px;height:12px;border-radius:50%;flex:none;display:inline-block}
+svg text{fill:var(--muted);font-family:var(--body);font-size:12px}
+button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--scorp-hi);outline-offset:2px}
+[hidden]{display:none!important}
+.left{display:flex;align-items:center;gap:10px;padding:0 4px}
+.left .ln{font-family:var(--display);font-weight:800;font-size:22px;line-height:1;color:var(--scorp-hi);font-variant-numeric:tabular-nums;min-width:2ch}
+.left .lm{flex:1;height:6px;background:var(--panel2);border-radius:999px;overflow:hidden}
+.left .lf{height:100%;background:var(--scorp);border-radius:999px}
+.left .lp{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:4ch;text-align:right}
+@media (max-width:380px){.ttl{font-size:34px}.zone button.in{font-size:22px}.g5 button{width:38px;height:38px}}
+/*PENSCSS*/
+</style>
+
+<div class="wrap">
+  <header>
+    <img src="__LOGO__" alt="Scorpions logo">
+    <div><div class="brand">Scorps Throwing</div><div class="ttl">Coach page</div><div class="hsub">Coach Brooks only. Don't share this link: it has grades and check-ins.</div></div>
+  </header>
+
+  <div class="left" aria-label="Sessions left"><span class="ln" id="left">36</span><div class="lm"><div class="lf" id="leftf"></div></div><span class="lp" id="leftp">0%</span></div>
+  <div class="datebar">
+    <button id="dprev" aria-label="Previous session">‹</button>
+    <div class="mid"><div class="a" id="da"></div><div class="b" id="db"></div><button class="todayb" id="dtoday" hidden>↩ Today</button></div>
+    <button id="dnext" aria-label="Next session">›</button>
+  </div>
+
+  <details class="sec" id="s-grade"><summary><h2>Grade the session</h2><span class="sm" id="gradeSum"></span></summary><div class="body" id="grade"></div></details>
+  <details class="sec" id="s-today"><summary><h2>Today</h2><span class="sm" id="todaySum"></span></summary><div class="body" id="today"></div></details>
+  <details class="sec" id="s-chart"><summary><h2>Chart a bullpen</h2><span class="sm" id="chartSum"></span></summary><div class="body" id="chart"></div></details>
+  <details class="sec" id="s-check"><summary><h2>Check-ins</h2><span class="sm" id="checkSum"></span></summary><div class="body" id="check"></div></details>
+  <details class="sec" id="s-recap"><summary><h2>Recap &amp; progress</h2><span class="sm" id="recapSum"></span></summary><div class="body" id="recap"></div></details>
+  <details class="sec" id="s-velo"><summary><h2>Velo &amp; grades</h2><span class="sm" id="veloSum"></span></summary><div class="body" id="velo"></div></details>
+  <details class="sec" id="s-focus"><summary><h2>My focus cards</h2><span class="sm" id="focusSum"></span></summary><div class="body" id="focus"></div></details>
+  <details class="sec" id="s-dates"><summary><h2>Key dates</h2><span class="sm" id="datesSum"></span></summary><div class="body" id="dates"></div></details>
+  <details class="sec" id="s-roster"><summary><h2>Roster</h2><span class="sm">11 players</span></summary><div class="body" id="roster"></div></details>
+</div>
+
+<script>
+const C=__DATA__;
+/*PENSJS*/
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],DN=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const pd=s=>{const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
+const fmt=s=>{const d=pd(s);return MON[d.getMonth()]+" "+d.getDate()};
+const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const TODAY=iso(new Date());
+const KID=Object.fromEntries(C.kids.map(k=>[k.s,k]));
+const SDATES=Object.keys(C.sess).sort();
+let selD=SDATES.find(d=>d>=TODAY)||SDATES[SDATES.length-1];
+let selK=null,curT="FB",gmOn=false;
+let db=null,pens={},grades={},canWrite=false;
+const queue={};
+
+/* ---------- date ---------- */
+function setDate(d){selD=d;selK=null;gmOn=false;renderAll()}
+$("dprev").onclick=()=>{const i=SDATES.indexOf(selD);if(i>0)setDate(SDATES[i-1])};
+$("dnext").onclick=()=>{const i=SDATES.indexOf(selD);if(i<SDATES.length-1)setDate(SDATES[i+1])};
+$("dtoday").onclick=()=>setDate(SDATES.find(d=>d>=TODAY)||SDATES[SDATES.length-1]);
+function renderDate(){const d=pd(selD);$("da").textContent=DN[d.getDay()]+" · "+fmt(selD);
+  const any=Object.values(C.sess[selD])[0];$("db").textContent=(selD===TODAY?"Today · ":selD<TODAY?"Past · ":"")+"Week "+any.wk+" · "+any.phase;
+  const nxt=SDATES.find(x=>x>=TODAY);$("dtoday").hidden=selD===nxt;
+  $("dprev").disabled=SDATES.indexOf(selD)===0;$("dnext").disabled=SDATES.indexOf(selD)===SDATES.length-1}
+
+/* ---------- today ---------- */
+function rowTags(r){const t=[];if(r.vt)t.push(`<span class="tag mx">Velo test</span>`);if(r.pen)t.push(`<span class="tag pen">Pen ${r.pen}</span>`);if(r.pull)t.push(`<span class="tag mx">Pulldowns ${r.pull}</span>`);if(r.td)t.push(`<span class="tag mx">Throwdowns ${r.td}</span>`);if(r.mb)t.push(`<span class="tag mb">Med ball</span>`);if(!r.pen&&!r.td&&!r.vt)t.push(`<span class="tag">Plyos + net</span>`);return t.join("")}
+function renderToday(){const S=C.sess[selD],by={};
+  Object.entries(S).forEach(([s,r])=>{(by[r.grp]=by[r.grp]||[]).push([s,r])});
+  const nPen=Object.values(S).filter(r=>r.pen).length,nMb=Object.values(S).filter(r=>r.mb).length;
+  const first=Object.values(S)[0];
+  $("todaySum").textContent=first.title.replace(/ · .*/,"")+(nPen?` · ${nPen} pens`:"");
+  $("today").innerHTML=`<div class="sumrow"><span class="tag t">${esc(first.phase)}</span>${nPen?`<span class="tag pen">${nPen} bullpens</span>`:""}${nMb?`<span class="tag mb">Med ball for ${nMb}</span>`:""}${Object.values(S).some(r=>r.vt)?`<span class="tag mx">Velo test day</span>`:""}${C.dates.filter(x=>x.d===selD&&x.k==="pat").length?`<span class="tag" style="border-color:var(--amber);color:var(--amber)">Pat out</span>`:""}</div>`+
+  Object.keys(by).sort((a,b)=>parseInt(a)-parseInt(b)||a.localeCompare(b)).map(g=>`<div class="grp"><div class="gh">${esc(g)}<small>${by[g].length} players</small></div>${by[g].map(([s,r])=>{const k=KID[s],P=(pens[s+"_"+selD]||{}).p||[];
+    return `<div class="krow"><div style="min-width:0"><div class="nm"><a href="${esc(k.url)}" target="_blank" rel="noopener">${esc(k.f+" "+k.l)}</a></div><div class="tags"><span class="tag t">Tier ${k.tier}${k.cat?" · C":""}</span>${rowTags(r)}${P.length?`<span class="tag dn">Charted ${P.length}</span>`:""}</div></div><div class="eff ${r.eff==="MAX"?"mx":""}">${esc(r.eff||"")}</div></div>`}).join("")}</div>`).join("")}
+
+/* ---------- chart ---------- */
+function penKids(){const S=C.sess[selD];return C.kids.filter(k=>S[k.s]&&!k.cat)}
+function curP(){return selK?((pens[selK+"_"+selD]||{}).p||[]):[]}
+function renderChart(){const S=C.sess[selD],ks=penKids(),el=$("chart");
+  const withPen=ks.filter(k=>S[k.s].pen);
+  $("chartSum").textContent=withPen.length?withPen.length+" scheduled pens":"No pens scheduled";
+  if(!selK&&withPen.length)selK=withPen.find(k=>!((pens[k.s+"_"+selD]||{}).p||[]).length)?.s||withPen[0].s;
+  const order=[...withPen,...ks.filter(k=>!S[k.s].pen)];
+  let h=`<div class="picker" role="group" aria-label="Pick a player">${order.map(k=>{const n=((pens[k.s+"_"+selD]||{}).p||[]).length;return `<button type="button" data-k="${k.s}" aria-pressed="${selK===k.s}" class="${n?"has":""}">${esc(k.l)}<small>${S[k.s].pen?"pen "+S[k.s].pen:"no pen"}${n?" · "+n:""}</small></button>`}).join("")}</div>`;
+  if(!db)h+=`<div class="note">Charting saves to this page. Open it signed in to claude.ai to chart. Everything else on the page still works.</div>`;
+  if(!withPen.length)h+=`<div class="empty">No bullpens on the schedule this day. You can still pick a player and chart extra pitches.</div>`;
+  if(!selK){el.innerHTML=h;wirePicker();return}
+  const k=KID[selK],P=curP(),goal=S[selK].pen||0;
+  h+=`<div class="cnt ${goal&&P.length>goal?"over":""}"><div class="big">${P.length}<small>${goal?" / "+goal:""} pitches</small></div><div class="who">${esc(k.f+" "+k.l)}<div class="hsub" style="text-transform:none">${goal?(P.length>=goal?"Count reached":(goal-P.length)+" to go"):"Extra pitches"}</div></div></div>
+  <div class="types" role="group" aria-label="Pitch type">${PORDER.map(t=>`<button type="button" data-t="${t}" style="--tc:${PC[t]}" aria-pressed="${curT===t}">${t}<small>${PT[t]}</small></button>`).join("")}</div>
+  <div class="ctl"><label for="velo-in">Velo (optional)<input id="velo-in" type="number" inputmode="decimal" min="30" max="99" step="0.1" placeholder="mph"></label><button type="button" class="gmb" id="gm" aria-pressed="${gmOn}">Good miss</button></div>
+  <div class="zhint">Tap where it went. Inner 9 = the holes (catcher's view). Turn on Good miss before you tap a ball.</div>
+  <div class="zone" id="zone">${[...Array(25)].map((_,i)=>{const x=i%5,y=Math.floor(i/5),inZ=x>=1&&x<=3&&y>=1&&y<=3;return `<button type="button" data-x="${x}" data-y="${y}" class="${inZ?"in":""}" ${db?"":"disabled"} aria-label="${inZ?"Hole "+holeN(x,y):"Ball, "+(y===0?"high":y===4?"low":"")+(x===0?" arm side":x===4?" glove side":"")}">${inZ?holeN(x,y):"ball"}</button>`}).join("")}</div>
+  <div class="recent">${P.slice(-12).map((p,i,a)=>`<span class="pchip ${isK(p)?"k":p.g?"g":""}"><i style="background:${PC[p.t]}"></i>${P.length-a.length+i+1}. ${p.t} ${isK(p)?"#"+holeN(p.x,p.y):p.g?"good miss":"ball"}${typeof p.v==="number"?" · "+p.v:""}</span>`).join("")}</div>
+  <div class="btnrow"><button type="button" class="btn" id="undo" ${P.length&&db?"":"disabled"}>Undo last pitch</button><span class="status" id="cstat"></span></div>
+  <div class="sub">This bullpen so far</div>${recapHTML(P)}`;
+  el.innerHTML=h;wirePicker();
+  el.querySelectorAll(".types button").forEach(b=>b.onclick=()=>{curT=b.dataset.t;el.querySelectorAll(".types button").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+  $("gm").onclick=()=>{gmOn=!gmOn;$("gm").setAttribute("aria-pressed",gmOn)};
+  $("zone").onclick=e=>{const b=e.target.closest("button");if(!b||!db)return;const x=+b.dataset.x,y=+b.dataset.y;
+    const vr=parseFloat($("velo-in").value);const p={t:curT,x,y};if(isFinite(vr)&&vr>30&&vr<100)p.v=Math.round(vr*10)/10;if(gmOn&&!isK(p))p.g=true;
+    const key=selK+"_"+selD;pens[key]={kid:selK,date:selD,p:[...curP(),p]};gmOn=false;renderChart();renderToday();renderRecap();savePen(key);const vi=$("velo-in");if(vi)vi.value=""};
+  $("undo").onclick=()=>{const key=selK+"_"+selD,P=curP();if(!P.length)return;pens[key]={kid:selK,date:selD,p:P.slice(0,-1)};renderChart();renderToday();renderRecap();savePen(key);setStat("Removed the last pitch","ok")};
+}
+function wirePicker(){$("chart").querySelectorAll(".picker button").forEach(b=>b.onclick=()=>{selK=b.dataset.k;gmOn=false;renderChart();renderRecap()})}
+function setStat(t,c){const s=$("cstat");if(s){s.textContent=t;s.className="status "+(c||"")}}
+async function savePen(key){if(!db)return;if(queue[key]){queue[key].again=true;return}queue[key]={again:false};
+  try{do{queue[key].again=false;const v=pens[key];await db.doc("pens/"+key).set({kid:v.kid,date:v.date,p:v.p,at:new Date().toISOString()})}while(queue[key].again);setStat("Saved","ok")}
+  catch(e){setStat(e&&e.code==="invalid_argument"?"Couldn't save: open this page as its owner.":"Couldn't save. Check your connection, then tap again.","bad")}
+  finally{delete queue[key]}}
+
+/* ---------- recap & progress ---------- */
+function kidPens(s){return Object.values(pens).filter(x=>x.kid===s).map(x=>({d:x.date,p:x.p}))}
+function renderRecap(){const el=$("recap");const s=selK||penKids().find(k=>kidPens(k.s).length)?.s;
+  const charted=new Set(Object.values(pens).filter(x=>x.p&&x.p.length).map(x=>x.kid));
+  $("recapSum").textContent=charted.size?charted.size+" players charted":"Starts Dec 30";
+  if(!s){el.innerHTML=`<div class="empty">Pick a player in Chart a bullpen. Their recap for this day and their progress across every bullpen show here.</div>`;return}
+  const L=kidPens(s).filter(x=>x.p.length).sort((a,b)=>a.d<b.d?-1:1),today=L.find(x=>x.d===selD);
+  el.innerHTML=`<div class="gh">${esc(KID[s].f+" "+KID[s].l)}<small>${L.length} charted bullpens</small></div><div class="sub">${fmt(selD)}</div>${today?recapHTML(today.p):`<div class="empty">Nothing charted for ${esc(KID[s].l)} on ${fmt(selD)}.</div>`}<div class="sub" style="margin-top:12px">Progress</div>${progressHTML(L)}`}
+
+/* ---------- grades ---------- */
+function renderGrade(){const S=C.sess[selD],ks=C.kids.filter(k=>S[k.s]),G=grades[selD]||{g:{},n:{}};
+  const done=ks.filter(k=>G.g&&G.g[k.s]).length;$("gradeSum").textContent=done+" / "+ks.length+" graded";
+  $("grade").innerHTML=`<div class="hsub">1 = rough day · 5 = locked in. Saves as you tap. Players never see these.</div>${db?"":`<div class="note">Open this page signed in to claude.ai to save grades.</div>`}`+ks.map(k=>`<div class="gr"><div class="nm">${esc(k.f+" "+k.l)}<small>Tier ${k.tier} · ${esc(S[k.s].grp)}</small></div><div class="g5" role="group" aria-label="Grade ${esc(k.l)}">${[1,2,3,4,5].map(n=>`<button type="button" data-k="${k.s}" data-n="${n}" aria-pressed="${G.g&&G.g[k.s]===n}" ${db?"":"disabled"}>${n}</button>`).join("")}</div><div class="gn"><input id="gn-${k.s}" data-k="${k.s}" placeholder="Notes (optional)" value="${esc(G.n&&G.n[k.s]||"")}" ${db?"":"disabled"}></div></div>`).join("")+`<div class="btnrow"><span class="status" id="gstat"></span></div>`;
+  $("grade").querySelectorAll(".g5 button").forEach(b=>b.onclick=()=>{const cur=grades[selD]||{g:{},n:{}},g={...cur.g},n=+b.dataset.n;if(g[b.dataset.k]===n)delete g[b.dataset.k];else g[b.dataset.k]=n;grades[selD]={...cur,g};renderGrade();renderVelo();saveGrade()});
+  $("grade").querySelectorAll(".gn input").forEach(i=>{let t;i.oninput=()=>{clearTimeout(t);t=setTimeout(()=>{const cur=grades[selD]||{g:{},n:{}};grades[selD]={...cur,n:{...cur.n,[i.dataset.k]:i.value}};saveGrade()},700)}})}
+async function saveGrade(){if(!db)return;const key="g_"+selD,d=selD;if(queue[key]){queue[key].again=true;return}queue[key]={again:false};const st=t=>{const s=$("gstat");if(s){s.textContent=t[0];s.className="status "+t[1]}};
+  try{do{queue[key].again=false;const v=grades[d];await db.doc("grades/"+d).set({date:d,g:v.g||{},n:v.n||{},at:new Date().toISOString()})}while(queue[key].again);st(["Saved","ok"])}catch(e){st(["Couldn't save. Check your connection, then tap again.","bad"])}finally{delete queue[key]}}
+
+/* ---------- focus ---------- */
+function renderFocus(){const n=C.kids.filter(k=>k.focus).length;$("focusSum").textContent=n?n+" set":"After Day 1";
+  $("focus").innerHTML=`${n?"":`<div class="hsub">Send me your Day 1 notes. I'll pick a cue and drills for each kid, you approve, and they show here and on each player's page.</div>`}<div class="fgrid">${C.kids.map(k=>k.focus?`<div class="fc"><div class="who">${esc(k.f+" "+k.l)}</div><div class="cue">"${esc(k.focus.cue)}"</div><div class="why">${esc(k.focus.why)}</div>${(k.focus.drills||[]).length?`<ul>${k.focus.drills.map(x=>`<li>${esc(x.n)}${x.txt?" · "+esc(x.txt):""}</li>`).join("")}</ul>`:""}</div>`:`<div class="fc wait"><div class="who">${esc(k.f+" "+k.l)} · Tier ${k.tier}</div><div class="cue">Waiting on Day 1</div></div>`).join("")}</div>`}
+
+/* ---------- check-ins ---------- */
+function renderCheck(){const L=C.checkins;$("checkSum").textContent=C.ckAsOf?"As of "+fmt(C.ckAsOf):"Weekly";
+  if(!L.length){$("check").innerHTML=`<div class="empty">Check-in and check-out answers land here once a week, starting after the first sessions (Nov 4 and 7). Pain 3+ or soreness 4+ shows in red at the top.</div>`;return}
+  const flag=x=>(x.pain>=3)||(x.sore>=4)||x.off;
+  const s=[...L].sort((a,b)=>(flag(b)?1:0)-(flag(a)?1:0)||(a.d<b.d?1:-1));
+  $("check").innerHTML=`<div class="tscroll"><table class="dt"><thead><tr><th>Player</th><th>Date</th><th>In/out</th><th>Arm</th><th>Pain</th><th>Sore</th></tr></thead><tbody>${s.map(x=>`<tr><td class="${flag(x)?"bad":""}">${esc(x.name)}</td><td>${fmt(x.d)}</td><td>${esc(x.when)}</td><td>${x.arm??"–"}</td><td class="${x.pain>=3?"bad":""}">${x.pain??"–"}</td><td class="${x.sore>=4?"bad":""}">${x.sore??"–"}</td></tr>${x.where||x.notes||x.off?`<tr><td colspan="6" style="text-align:left;white-space:normal;color:var(--muted)">${x.off?"Felt off after throwing. ":""}${x.where?esc(x.where)+": ":""}${esc(x.notes||"")}</td></tr>`:""}`).join("")}</tbody></table></div><div class="hsub">Red = pain 3+, soreness 4+, or felt off after throwing.</div>`}
+
+/* ---------- velo & grades ---------- */
+function gradeStats(s){const v=Object.keys(grades).sort().map(d=>grades[d].g&&grades[d].g[s]).filter(Boolean);return {n:v.length,avg:v.length?avg(v):null,last4:v.length?avg(v.slice(-4)):null}}
+function renderVelo(){const rows=C.kids.map(k=>{const v=C.velo[k.s]||[],g=gradeStats(k.s),f=v[0],l=v[v.length-1];return {k,f,l,best:v.length?Math.max(...v.map(x=>x.top)):null,gain:f&&l?Math.round(10*(l.top-f.top))/10:null,g}});
+  const anyV=rows.some(r=>r.l),anyG=rows.some(r=>r.g.n);$("veloSum").textContent=(anyV?"Velo":"")+(anyV&&anyG?" + ":"")+(anyG?"grades":"")||"Starts Nov 25";
+  $("velo").innerHTML=`${anyV?"":`<div class="hsub">Velo fills in after the Nov 25 test, then every Wednesday from Dec 30. Grades fill in as you grade.</div>`}<div class="tscroll"><table class="dt"><thead><tr><th>Player</th><th>Start</th><th>Last</th><th>Best</th><th>Gain</th><th>Grade avg</th><th>Last 4</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.k.l)}${r.k.cat?" (C)":""}</td><td>${r.f?r.f.top:"–"}</td><td>${r.l?r.l.top:"–"}</td><td>${r.best??"–"}</td><td style="color:${r.gain>0?"var(--good)":r.gain<0?"#ff7b7f":"inherit"}">${r.gain==null?"–":(r.gain>0?"+":"")+r.gain}</td><td>${r.g.avg??"–"}</td><td class="${r.g.last4!=null&&r.g.last4<3?"bad":""}">${r.g.last4??"–"}</td></tr>`).join("")}</tbody></table></div><div class="hsub">Velo = top fastball (throwdown for catchers). Last 4 under 3.0 shows in red.</div>`}
+
+/* ---------- roster & dates ---------- */
+function renderRoster(){$("roster").innerHTML=`<div class="tscroll"><table class="dt"><thead><tr><th>Player</th><th>Tier</th><th>Wed</th><th>Sat</th><th>First pen</th></tr></thead><tbody>${C.kids.map(k=>`<tr><td><a href="${esc(k.url)}" target="_blank" rel="noopener">${esc(k.f+" "+k.l)}</a></td><td>${k.tier}${k.cat?" · C":""}</td><td>${esc(k.wed.replace("pm",""))}</td><td>${esc(k.sat.replace("am",""))}</td><td>${k.cat?"Throwdowns "+fmt("2026-12-30"):fmt(k.firstpen)}</td></tr>`).join("")}</tbody></table></div><div class="hsub">Tap a name to open his page.</div>`}
+function renderDates(){const nx=C.dates.find(x=>x.d>=TODAY);$("datesSum").textContent=nx?"Next: "+fmt(nx.d):"";
+  $("dates").innerHTML=`<div class="legend"><span><i class="ball" style="background:var(--fg)"></i>Big day</span><span><i class="ball" style="background:#4fc3b0"></i>Light week</span><span><i class="ball" style="background:var(--amber)"></i>Pat out</span></div><div class="dl">${C.dates.map(x=>`<div class="di ${x.k} ${x.d<TODAY?"past":""} ${x===nx?"next":""}"><div class="d">${fmt(x.d)}</div><div class="t">${esc(x.t)}</div></div>`).join("")}</div>`}
+
+function renderAll(){renderDate();renderToday();renderChart();renderRecap();renderGrade();renderVelo()}
+(function(){const done=SDATES.filter(d=>d<TODAY).length,n=SDATES.length,p=Math.round(100*done/n);$("left").textContent=n-done;$("leftf").style.width=p+"%";$("leftp").textContent=p+"%"})();
+renderAll();renderFocus();renderCheck();renderRoster();renderDates();
+
+/* ---------- live data ---------- */
+(async()=>{try{db=await claude.use("db")}catch(e){db=null}
+  if(!db){return}
+  renderChart();renderGrade();
+  db.collection("pens").onSnapshot(s=>{const n={};s.docs.forEach(d=>{if(d.exists)n[d.id]=d.data()});Object.keys(queue).forEach(k=>{if(pens[k])n[k]=pens[k]});pens=n;
+    const a=document.activeElement;if(a&&a.id==="velo-in")return;renderToday();renderChart();renderRecap()},()=>{});
+  db.collection("grades").onSnapshot(s=>{const n={};s.docs.forEach(d=>{if(d.exists)n[d.id]=d.data()});Object.keys(queue).forEach(k=>{if(k.startsWith("g_")&&grades[k.slice(2)])n[k.slice(2)]=grades[k.slice(2)]});grades=n;
+    const a=document.activeElement;if(!(a&&a.closest&&a.closest("#grade")))renderGrade();renderVelo()},()=>{});
+})();
+</script>
