@@ -1,4 +1,5 @@
 import json, base64, datetime as dt, re
+LINKS = json.load(open("links.json"))
 import gen
 
 URL = {"Fredericks": "QoZVuSrtVFgCCCMejbVr3Q", "Pirches": "RQgXZTPbNm9mud8cdSAJF9", "Campion": "6XNSRH9j7HqvsrxYXqS4xe",
@@ -11,7 +12,7 @@ for f, l, t, g in gen.PLAYERS:
     slug = l.lower().replace("é", "e")
     data = gen.post(gen.build(f, l, t, g))
     kids.append({"s": slug, "f": f, "l": l, "tier": t, "wed": data["wed"], "sat": data["sat"], "cat": data["catcher"],
-                 "url": "https://scorpsbaseballjb3.github.io/scorps/" + slug + "/", "firstpen": data["firstpen"], "focus": None})
+                 "url": "https://scorpsbaseballjb3.github.io/scorps/" + LINKS[slug] + "/", "firstpen": data["firstpen"], "focus": None})
     for w in data["weeks"]:
         for d in w["days"]:
             if not d.get("group"):
