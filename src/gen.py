@@ -5,7 +5,7 @@ PLAYERS = [
     ("Maddux", "Fredericks", "A", 2), ("Kenny", "Pirches", "A", 1), ("Ryan", "Campion", "A", 2),
     ("Cam", "Carlisle", "A", 1), ("Colby", "Paré", "A", 1), ("Nick", "Miller", "B", 2),
     ("Liam", "Kelley", "B", 2), ("Jared", "Davis", "B", 2), ("Cam", "Cote", "C", 1),
-    ("Andrew", "Knychalski", "C", 1), ("Eli", "Sydney", "C", 2),
+    ("Andrew", "Knychalski", "C", 1), ("Eli", "Sydney", "C", 2), ("Tyler", "Doucet", "B", 2),
 ]
 WED_T = {1: "5:30–7:00pm", 2: "7:00–8:30pm"}
 SAT_T = {1: "8:00–9:30am", 2: "9:30–11:00am"}
