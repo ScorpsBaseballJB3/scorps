@@ -281,6 +281,7 @@ GUIDE = {
  "mbscoop": {"name": "Rotational scoop toss", "g": "Med ball", "how": "Stand sideways to the net, ball at your back hip. Load into the back hip, then turn hard and scoop the ball into the net with both hands. Do both sides.", "cues": "Hips first, arms last. Throw it, don't push it.", "mis": "Arms doing all the work with no hip turn.", "chk": "Felt the turn start from your back hip?"},
  "mbslam": {"name": "Overhead slams", "g": "Med ball", "how": "Feet shoulder width. Reach the ball overhead and up on your toes, then slam it into the ground in front of you. Catch the bounce and reset.", "cues": "Tall, then snap down with your abs.", "mis": "Bending at the back with no reach up first.", "chk": "Stomach did the work, not your low back?"},
  "mbshot": {"name": "Step-behind shot put", "g": "Med ball", "how": "Ball at your throwing-side shoulder, elbow up. Step your back foot behind your front foot, stride toward the net, turn, and push the ball into the net like a shot put.", "cues": "Same stride and hip turn as your delivery.", "mis": "Opening your chest before your front foot lands.", "chk": "Front foot landed before you turned?"},
+ "lt": {"name": "Long toss stretch-out", "g": "Throwing", "how": "After your net throws, play catch with a partner and back up a few steps every 2 throws until you reach today's distance. Throw with arc. Then come back in to 90 ft for your last couple.", "cues": "Loose and long. Let the ball fly.", "mis": "Throwing on a line at max effort to reach the distance.", "chk": "Arm felt the same at the end as the start?"},
  "cb": {"name": "Cross-body shoulder stretch", "g": "Mobility", "how": "Bring the arm across your chest. Other hand pulls just above the elbow. Hold.", "cues": "Shoulder down. Gentle.", "mis": "Pulling hard into a pinch.", "chk": "Stretch in the back of the shoulder, not the front?"},
 }
 for k, v in GUIDE.items():
@@ -311,7 +312,33 @@ N2K = {"Stretch, then light run": "stretch", "Foam roll": "foam", "J-band series
        "Waiter walks": "waiter", "Band external rotation": "er", "Band internal rotation": "ir", "Band Y's and T's": "iyt",
        "Band wrist flexion and extension": "wrist", "Band forearm twists": "twist", "Open books": "ob", "Band I's, Y's, T's": "iyt", "90/90 rotations": "r9090", "Throwdowns": "tdown", "90/90 hip switches": "hip90", "World's greatest stretch": "wgs", "Half-kneeling hip flexor stretch": "hflex", "Quadruped T-spine rotation": "tspine", "Lateral lunges": "latl", "Standing hip CARs": "hcar", "Cross-body shoulder stretch": "cb"}
 N2K.update({v: k for k, v in NAMES.items()})
-N2K.update({"Rotational scoop toss": "mbscoop", "Overhead slams": "mbslam", "Step-behind shot put": "mbshot"})
+N2K.update({"Long toss stretch-out": "lt", "Rotational scoop toss": "mbscoop", "Overhead slams": "mbslam", "Step-behind shot put": "mbshot"})
+
+
+LT = {"Ramp": "90 ft", "Build": "100–120 ft", "Build 2": "120–140 ft", "Peak": "140–150 ft",
+      "Light week": "90–100 ft", "Deload": "90–100 ft", "Taper": "90–100 ft"}
+
+
+def doucet_extra(data):
+    """Tyler Doucet: two-way, more volume and arm strength at Tier B effort."""
+    for w in data["weeks"]:
+        for d in w["days"]:
+            wd = dt.date.fromisoformat(d["d"]).weekday()
+            for b in d.get("blocks", []):
+                if b["t"] == "Throwing":
+                    items = b["items"]
+                    for i, it in enumerate(items):
+                        if it["n"] == "Net throws" and it.get("txt") == "10 throws":
+                            it["txt"] = "15 throws"
+                            if wd == 5:  # Saturday: long toss after net throws
+                                items.insert(i + 1, {"n": "Long toss stretch-out", "txt": f"8–10 throws · out to {LT[w['phase']]}",
+                                                     "note": "Throw with arc. Add distance slowly, never max effort. Come back in to 90 ft to finish.", "eff": "70–80%"})
+                            break
+                if b["t"] == "Arm care":
+                    for it in b["items"]:
+                        if it["n"] in ("Band external rotation", "Band internal rotation", "Band wrist flexion and extension"):
+                            it["txt"] = it["txt"].replace("1 ×", "2 ×", 1) if it["txt"].startswith("1 ×") else it["txt"].replace("2 ×", "3 ×", 1)
+    return data
 
 
 def post(data):
@@ -373,7 +400,10 @@ if __name__ == "__main__":
     tpl = open("template.html").read().replace("/*PENSCSS*/", open("pens.css").read()).replace("/*PENSJS*/", open("pens.js").read() + open("setup.js").read())
     logo = "data:image/png;base64," + base64.b64encode(open("logo.png", "rb").read()).decode()
     for f, l, t, g in PLAYERS:
-        data = post(build(f, l, t, g))
+        data = build(f, l, t, g)
+        if l == "Doucet":
+            data = doucet_extra(data)
+        data = post(data)
         slug = urllib.parse.quote(l.lower().replace("é", "e"))
         html = tpl.replace("__TITLE__", f"{f} {l} · Scorps").replace("__LOGO__", logo).replace(
             "__DATA__", json.dumps(data, ensure_ascii=False, separators=(",", ":")))
