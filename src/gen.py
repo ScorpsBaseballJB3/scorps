@@ -433,14 +433,14 @@ if __name__ == "__main__":
             data["balls"] = DRIVELINE
             data = no_gray(data)
         if l == "Paré":  # his heavy ball is a gray 32 oz, not the green 1 kg
-            data["balls"] = {"kg": ["32 oz", "#9ca3af"], "kgx16": ["32 oz or 16 oz", "#9ca3af"]}
+            data["balls"] = {"kg": ["32 oz gray or 21 oz blue", "#9ca3af"], "kgx16": ["32, 21 or 16 oz", "#9ca3af"]}
             for w in data["weeks"]:
                 for d in w["days"]:
                     for b in d.get("blocks", []):
                         for it in b["items"]:
                             for k in ("txt", "note"):
                                 if isinstance(it.get(k), str):
-                                    it[k] = it[k].replace("1 kg", "32 oz")
+                                    it[k] = it[k].replace("1 kg", "32 oz gray or 21 oz blue")
         data["goals"] = GOALS.get(l)
         data = post(data)
         slug = urllib.parse.quote(l.lower().replace("é", "e"))
