@@ -136,6 +136,11 @@ details.ggd>summary{list-style:none;cursor:pointer;padding:14px 4px;font-family:
 @media (max-width:380px){.pname{font-size:34px}header img{width:76px}.days .dnum{font-size:19px}}
 @media (prefers-reduced-motion:no-preference){.card{transition:opacity .2s}}
 /*PENSCSS*/
+.intent{display:flex;gap:12px;align-items:flex-start;border:2px solid #5a3a91;background:#1a1328;border-radius:14px;padding:12px;margin-bottom:10px}
+.intent .iv{font-family:var(--display);font-weight:800;font-size:28px;line-height:1;color:var(--scorp-hi);white-space:nowrap}
+.intent.mx{border-color:#e5484d}.intent.mx .iv{color:#ff7b7f}
+.intent b{color:var(--fg)}.intent{color:var(--silver);font-size:15px}
+.intent .ism{font-size:13px;color:var(--muted);margin-top:4px}
 details.sec{background:#050407;border-color:#262033}
 .ckbar{display:flex;align-items:center;justify-content:center;gap:12px;min-height:66px;border-radius:16px;background:linear-gradient(135deg,#7c4dd6,#a77ff0);color:#fff;text-decoration:none;box-shadow:0 6px 22px rgba(155,108,224,.35);padding:10px 16px;text-align:center}
 .ckbar b{font:800 24px var(--display);letter-spacing:.08em;text-transform:uppercase;display:block;line-height:1}
@@ -231,7 +236,11 @@ const GO=["Warm-up","Mobility","Med ball","Plyos","Catcher plyos","Throwing","Re
 function guide(){const grp={};Object.values(D.guide).forEach(g=>(grp[g.g]=grp[g.g]||[]).push(g));
  $("guide").innerHTML=`<details class="gwrap" id="gwrap"><summary><span>Drill guide</span></summary><div class="empty" style="margin:0 0 6px">Tap a group, then a drill. Plyos go into the wall. Baseball throws go into the net.</div>`+Object.entries(grp).sort((a,b)=>GO.indexOf(a[0])-GO.indexOf(b[0])).map(([n,gs])=>`<details class="ggd"><summary>${esc(n)}</summary><div class="ggi">`+gs.map(g=>`<details class="gi"><summary>${esc(g.name)}</summary>${ddHTML(g,true)}</details>`).join("")+`</div></details>`).join("")+`</details>`}
 $("gopen").onclick=()=>{guide();$("gwrap").open=true;$("guide").scrollIntoView({behavior:"smooth"})};
-const KEY=`<div class="legend key"><span><i class="ball" style="background:var(--b-kg)"></i>1 kg</span><span><i class="ball" style="background:var(--b-16)"></i>16 oz</span><span><i class="ball" style="background:var(--b-10)"></i>10 oz</span><span><i class="ball" style="background:var(--b-8)"></i>7.5 oz</span><span><i class="ball" style="background:var(--b-5)"></i>5 oz</span></div>`;
+if(D.balls)Object.assign(BALL,D.balls);
+const KEY=`<div class="legend key">${["kg","16","10","8","5"].map(k=>`<span><i class="ball" style="background:${BALL[k][1]}"></i>${BALL[k][0]}</span>`).join("")}</div>`;
+function intentHTML(e){if(!e)return "";const mx=e==="MAX";const n=mx?100:Math.max(...(e.match(/\d+/g)||[0]).map(Number));
+  const [h,d]=mx?["All-out, today only","Full intent on the marked throws. Full rest between them. Everything else stays easy."]:n<=60?["Easy","Smooth and loose, like warm-up catch. If you're grunting, back off."]:n<=75?["Medium","Firm but relaxed. You could throw like this all day."]:n<=85?["Firm, not max","Good intent and in control. Still a gear or two below your hardest."]:["Hard, not all-out","One gear below max. Stay smooth."];
+  return `<div class="intent ${mx?"mx":""}"><div class="iv">${mx?"MAX":esc(e)}</div><div><b>${h}.</b> ${d}<div class="ism">This is how hard, not how far. Feel like you're going harder than this? Slow down. More effort than the plan doesn't make you better, it makes you sore.</div></div></div>`}
 function repsHTML(it){
   if(it.r) return it.r.map(([n,b])=>`<span class="rp"><i class="ball" style="background:${BALL[b][1]}"></i><span class="c">${n}</span><span class="w">${BALL[b][0]}</span></span>`).join('<span class="arr">→</span>');
   if(it.each) return `<span class="rp"><span class="c">${it.sets}</span><span class="w">${it.sets>1?"sets":"set"} · ${it.per||1} each</span></span>`+it.each.map(b=>`<span class="rp"><i class="ball" style="background:${BALL[b][1]}"></i><span class="w">${BALL[b][0]}</span></span>`).join("");
@@ -247,7 +256,7 @@ function render(){
   $("banner").style.borderColor=T[1];
   $("banner").innerHTML=`<div class="k" style="color:${T[1]}">${DN[di]} · ${fmt(pd(dy.d))}${dy.d===today?" · Today":""}</div><div class="h">${esc(dy.title)}</div>${dy.group?`<div class="m">Your group: ${esc(dy.group)}</div>`:""}${dy.effl?`<div class="eff"><div class="v ${dy.effl==="MAX"?"mxv":""}" style="${dy.effl==="MAX"?"":"color:"+T[1]}">${dy.effl==="MAX"?"MAX":esc(dy.effl)}</div><div class="t">${dy.effl==="MAX"?"Max effort day":"Effort today"}</div></div>`:""}`;
   const ckb=w=>{const did=store.get("ck|"+w+"|"+dy.d);return `<a class="ckbar ${did?"did":""}" data-ck="${w}" href="${CK[w]}" target="_blank" rel="noopener"><span><b>${did?"✓ Checked "+w:"✓ Check "+w}</b><small>${did?"Tap to open the form again":w==="in"?"Before you throw · how's your arm?":"Before you leave · how's your arm now?"}</small></span></a>`};
-  $("blocks").innerHTML=(dy.group?ckb("in"):"")+(dy.blocks||[]).map((b,bi)=>`<details class="sec"><summary>${esc(b.t)}</summary><div class="blk">${b.sub?`<div class="secsub">${esc(b.sub)}</div>`:""}${b.t==="Throwing"?KEY:""}${b.items.map((it,ii)=>{
+  $("blocks").innerHTML=(dy.group?ckb("in"):"")+(dy.blocks||[]).map((b,bi)=>`<details class="sec"><summary>${esc(b.t)}</summary><div class="blk">${b.sub?`<div class="secsub">${esc(b.sub)}</div>`:""}${b.t==="Throwing"?intentHTML(dy.effl)+KEY:""}${b.items.map((it,ii)=>{
     const k=D.last+"|"+dy.d+"|"+bi+"|"+ii,done=store.get(k);
     return `<div class="card ${it.big?"big":""} ${done?"done":""}" data-k="${esc(k)}"><div style="min-width:0"><div class="nm">${esc(it.n)}${it.eff?`<span class="ec ${it.eff==="MAX"?"mx":""}">${esc(it.eff)}</span>`:""}</div>${it.r||it.each?`<div class="reps">${repsHTML(it)}</div>`:""}${it.txt?`<div class="txt">${esc(it.txt)}</div>`:""}${it.note?`<div class="note">${esc(it.note)}</div>`:""}${it.k?`<div class="more">Tap for how-to</div>`:""}</div><button class="chk" aria-label="Mark ${esc(it.n)} done">✓</button>${it.k?ddHTML(D.guide[it.k],false):""}</div>`}).join("")}</div></details>`).join("")+(dy.group?ckb("out"):"")||`<div class="restbox"><b>Nothing today.</b> Rest your arm.</div>`;
   prog();
@@ -298,7 +307,7 @@ function confetti(cv){try{if(matchMedia("(prefers-reduced-motion: reduce)").matc
   const t0=performance.now();(function f(t){const k=t-t0;x.clearRect(0,0,W,H);P.forEach(p=>{p.vy+=.28;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.globalAlpha=Math.max(0,1-k/3200);x.fillStyle=p.c;x.fillRect(-p.w/2,-p.h/2,p.w,p.h*Math.abs(Math.cos(p.r*2)));x.restore()});if(k<3300&&cv.isConnected)requestAnimationFrame(f);else x.clearRect(0,0,W,H)})(t0)}
 
 function focusCard(){const f=D.focus,el=$("focus");
-  if(!f){el.classList.add("wait");el.innerHTML=`<div class="lb">My focus</div><div class="cue">Coach sets this after Day 1</div><div class="why">After your Day 1 video, Coach Brooks picks one thing for you to work on, with a cue and drills.</div>`;return}
+  if(!f){el.classList.add("wait");el.innerHTML=`<div class="lb">My focus</div><div class="cue">Coach sets this after Day 1</div><div class="why">After your Day 1 video, Coach Brooks picks one thing for you to work on, with a cue and drills.</div>${D.goals?`<div class="why"><b>Your goals:</b> ${esc(D.goals)}</div>`:""}`;return}
   el.innerHTML=`<div class="lb">My focus</div><div class="cue">"${esc(f.cue)}"</div><div class="why">${esc(f.why)}</div>${f.drills&&f.drills.length?`<ul>${f.drills.map(x=>`<li><b>${esc(x.n)}</b>${x.txt?" · "+esc(x.txt):""}</li>`).join("")}</ul>`:""}`}
 function pensSec(){const el=$("pens");if(D.catcher){el.hidden=true;return}
   const L=(D.pens||[]).filter(x=>x.p&&x.p.length).sort((a,b)=>a.d<b.d?-1:1);

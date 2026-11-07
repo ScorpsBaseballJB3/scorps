@@ -30,11 +30,11 @@ CATCHERS = {"Campion"}
 LAD = {"A": [(3, "10"), (4, "8"), (4, "5")], "B": [(3, "10"), (3, "8"), (3, "5")], "C": [(2, "10"), (3, "8"), (3, "5")]}
 REV = {"A": [(6, "kg"), (6, "kgx16")], "B": [(5, "kg"), (5, "kgx16")], "C": [(4, "16"), (4, "16x10")]}
 WW = {"A": (2, 2), "B": (2, 2), "C": (2, 1)}
-CLAD = [(3, "10"), (3, "8"), (3, "5")]
+CLAD = [(3, "10"), (3, "8"), (2, "5")]  # Campion: ~50-55 throws a session
 NAMES = {"rev": "Reverse throws", "hk": "Half-kneeling throws", "rock": "Rocker throws", "roll": "Roll-ins",
          "drop": "Drop backs", "step": "Step-backs", "ww": "Walking windups",
          "kd": "Knee-down throws", "ex": "Exchange throws", "jp": "Jab-pivot throws",
-         "ssr": "Secondary-stance rockers", "wtd": "Walking throwdowns"}
+         "ssr": "Secondary-stance rockers", "wtd": "Walking throwdowns", "sb": "Step-behind throws"}
 BLOCK = {1: ("roll", ("hk", "rock")), 2: ("roll", ("drop", "step")), 3: ("rock", ("roll", "drop")),
          4: ("step", ("roll", "hk")), 5: ("roll", ("rock", "step"))}
 
@@ -68,7 +68,7 @@ def plyo_item(key, tier, m, core_only=False, catcher=False):
 
 def plist_for(w, core_only, catcher, wed):
     if catcher:
-        return ["rev", "kd", "ex", "wtd"] if wed and core_only else ["rev", "kd", "ex", "jp", "ssr", "wtd"]
+        return ["rev", "kd", "ex", "sb"] if wed and core_only else ["rev", "kd", "ex", "sb", "ssr"]
     c2, (r1, r2) = BLOCK[blk(w)]
     return ["rev", c2, "ww"] if core_only else ["rev", r1, c2, r2, "ww"]
 
@@ -249,6 +249,7 @@ GUIDE = {
  "ex": {"name": "Exchange throws", "g": "Catcher plyos", "how": "From your stance, catch a feed, transfer to your throwing hand at the chest, and throw into the wall in one motion.", "cues": "Glove to chest. Fast hands, not fast arm.", "mis": "Reaching out to transfer.", "chk": "Clean transfer every rep?"},
  "jp": {"name": "Jab-pivot throws", "g": "Catcher plyos", "how": "From your stance, jab the throwing-side foot, pivot to line up with the wall, throw.", "cues": "Small jab. Get on line.", "mis": "Big step that pulls you off line.", "chk": "Shoulders lined up with the target?"},
  "ssr": {"name": "Secondary-stance rockers", "g": "Catcher plyos", "how": "In your runners-on stance, rock weight back and forth twice, then come up and throw.", "cues": "Stay low until you throw.", "mis": "Standing up early.", "chk": "Weight moved toward the target?"},
+ "sb": {"name": "Step-behind throws", "g": "Catcher plyos", "how": "From your stance, catch a feed, step your throwing-side foot behind your glove-side foot to get on line, then stride and throw into the wall.", "cues": "Back foot behind, hips closed, then throw.", "mis": "Stepping across or in front, which opens your hips early.", "chk": "Back foot landed behind and lined you up?"},
  "wtd": {"name": "Walking throwdowns", "g": "Catcher plyos", "how": "Walk two steps toward the wall, drop into your catching footwork, and throw. Full motion at game rhythm.", "cues": "Momentum into the throw.", "mis": "Walking in, then stopping dead.", "chk": "Footwork and throw flowed together?"},
  "tdown": {"name": "Throwdowns", "g": "Throwing", "how": "From the crouch, receive, transfer, and throw into the net about 55 ft away. Full game footwork.", "cues": "Quick feet, firm throw, on line.", "mis": "Rushing the arm ahead of the feet.", "chk": "Each throw on line and pain-free?"},
  "stretch": {"name": "Stretch, then light run", "g": "Warm-up", "how": "Dynamic stretch head to toe, then jog until you break a light sweat.", "cues": "Loose, not tired.", "mis": "Rushing it to get to throwing.", "chk": "Body warm before you pick up a ball?"},
@@ -299,6 +300,7 @@ SETUP = {
  "ex": ("crouch", "9–11 ft", "Catcher's stance facing the wall, 9–11 ft away. Someone feeds you a ball."),
  "jp": ("jp", "9–11 ft", "Catcher's stance facing the wall, 9–11 ft away. Jab your throwing-side foot, pivot sideways, throw."),
  "ssr": ("crouch", "9–11 ft", "Runners-on stance facing the wall, 9–11 ft away."),
+ "sb": ("jp", "9–11 ft", "Catcher's stance facing the wall, 9–11 ft away. Throwing-side foot steps behind your glove foot, then throw."),
  "wtd": ("walk", "16 ft", "Start about 16 ft back, facing the wall. Walk 2 steps into your footwork and throw from about 9–11 ft."),
  "mbscoop": ("side", "7–9 ft", "Sideways to the field net, glove side toward it, 7–9 ft away. Ball at your back hip.", "net"),
  "mbshot": ("drop", "7–9 ft", "Sideways to the field net, 7–9 ft away. Ball at your throwing shoulder. Back foot steps behind your front foot.", "net"),
@@ -339,6 +341,11 @@ def doucet_extra(data):
                         if it["n"] in ("Band external rotation", "Band internal rotation", "Band wrist flexion and extension"):
                             it["txt"] = it["txt"].replace("1 ×", "2 ×", 1) if it["txt"].startswith("1 ×") else it["txt"].replace("2 ×", "3 ×", 1)
     return data
+
+
+DRIVELINE = {"kg": ["1000 g", "var(--b-kg)"], "kgx16": ["1000 g or 450 g", "var(--b-kg)"], "16": ["450 g", "var(--b-16)"],
+             "16x10": ["450 or 225 g", "var(--b-16)"], "10": ["225 g", "var(--b-8)"], "8": ["150 g", "var(--b-10)"], "5": ["100 g", "#9ca3af"]}
+GOALS = {"Doucet": "Command and velo, while keeping your arm healthy."}
 
 
 def post(data):
@@ -403,6 +410,9 @@ if __name__ == "__main__":
         data = build(f, l, t, g)
         if l == "Doucet":
             data = doucet_extra(data)
+        if l == "Fredericks":
+            data["balls"] = DRIVELINE
+        data["goals"] = GOALS.get(l)
         data = post(data)
         slug = urllib.parse.quote(l.lower().replace("é", "e"))
         html = tpl.replace("__TITLE__", f"{f} {l} · Scorps").replace("__LOGO__", logo).replace(
