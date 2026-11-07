@@ -348,6 +348,25 @@ DRIVELINE = {"kg": ["1000 g", "var(--b-kg)"], "kgx16": ["1000 g or 450 g", "var(
 GOALS = {"Doucet": "Command and velo, while keeping your arm healthy."}
 
 
+def no_gray(data):
+    """Driveline kids: no 100 g gray ball; those throws go to the 150 g yellow."""
+    for w in data["weeks"]:
+        for d in w["days"]:
+            for b in d.get("blocks", []):
+                for it in b["items"]:
+                    if "r" in it and any(x[1] == "5" for x in it["r"]):
+                        g = sum(x[0] for x in it["r"] if x[1] == "5")
+                        it["r"] = [[x[0] + g, x[1]] if x[1] == "8" else x for x in it["r"] if x[1] != "5"]
+                    if "each" in it and "5" in it["each"]:
+                        n = it["sets"] * it.get("per", 1)
+                        it["r"] = [[n, "10"], [2 * n, "8"]]
+                        it["note"] = (it.get("note", "") + " " if it.get("note") else "") + f"Split over {it['sets']} {'sets' if it['sets'] > 1 else 'set'}."
+                        for k in ("each", "sets", "per"):
+                            it.pop(k, None)
+    data["nogray"] = True
+    return data
+
+
 def post(data):
     for w in data["weeks"]:
         for d in w["days"]:
@@ -412,6 +431,7 @@ if __name__ == "__main__":
             data = doucet_extra(data)
         if l in ("Fredericks", "Carlisle"):
             data["balls"] = DRIVELINE
+            data = no_gray(data)
         data["goals"] = GOALS.get(l)
         data = post(data)
         slug = urllib.parse.quote(l.lower().replace("é", "e"))
