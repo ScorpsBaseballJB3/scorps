@@ -410,7 +410,7 @@ if __name__ == "__main__":
         data = build(f, l, t, g)
         if l == "Doucet":
             data = doucet_extra(data)
-        if l == "Fredericks":
+        if l in ("Fredericks", "Carlisle"):
             data["balls"] = DRIVELINE
         data["goals"] = GOALS.get(l)
         data = post(data)
