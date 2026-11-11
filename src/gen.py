@@ -249,6 +249,7 @@ GUIDE = {
  "ex": {"name": "Exchange throws", "g": "Catcher plyos", "how": "From your stance, catch a feed, transfer to your throwing hand at the chest, and throw into the wall in one motion.", "cues": "Glove to chest. Fast hands, not fast arm.", "mis": "Reaching out to transfer.", "chk": "Clean transfer every rep?"},
  "jp": {"name": "Jab-pivot throws", "g": "Catcher plyos", "how": "From your stance, jab the throwing-side foot, pivot to line up with the wall, throw.", "cues": "Small jab. Get on line.", "mis": "Big step that pulls you off line.", "chk": "Shoulders lined up with the target?"},
  "ssr": {"name": "Secondary-stance rockers", "g": "Catcher plyos", "how": "In your runners-on stance, rock weight back and forth twice, then come up and throw.", "cues": "Stay low until you throw.", "mis": "Standing up early.", "chk": "Weight moved toward the target?"},
+ "saf": {"name": "Squat-and-fire throws", "g": "Plyos", "how": "Sit in your squat with the ball in your throwing hand, inside your glove. Fake a receive with the glove out front, bring it to your chest, transfer to your throwing hand, come up and throw into the wall.", "cues": "Catch it, chest, throw. Quick hands, smooth arm.", "mis": "Standing all the way up before you throw, or reaching out to transfer.", "chk": "Clean transfer at your chest every rep?"},
  "sb": {"name": "Step-behind throws", "g": "Catcher plyos", "how": "From your stance, catch a feed, step your throwing-side foot behind your glove-side foot to get on line, then stride and throw into the wall.", "cues": "Back foot behind, hips closed, then throw.", "mis": "Stepping across or in front, which opens your hips early.", "chk": "Back foot landed behind and lined you up?"},
  "wtd": {"name": "Walking throwdowns", "g": "Catcher plyos", "how": "Walk two steps toward the wall, drop into your catching footwork, and throw. Full motion at game rhythm.", "cues": "Momentum into the throw.", "mis": "Walking in, then stopping dead.", "chk": "Footwork and throw flowed together?"},
  "tdown": {"name": "Throwdowns", "g": "Throwing", "how": "From the crouch, receive, transfer, and throw into the net about 55 ft away. Full game footwork.", "cues": "Quick feet, firm throw, on line.", "mis": "Rushing the arm ahead of the feet.", "chk": "Each throw on line and pain-free?"},
@@ -300,6 +301,7 @@ SETUP = {
  "ex": ("crouch", "9–11 ft", "Catcher's stance facing the wall, 9–11 ft away. Someone feeds you a ball."),
  "jp": ("jp", "9–11 ft", "Catcher's stance facing the wall, 9–11 ft away. Jab your throwing-side foot, pivot sideways, throw."),
  "ssr": ("crouch", "9–11 ft", "Runners-on stance facing the wall, 9–11 ft away."),
+ "saf": ("crouch", "9–11 ft", "Catcher's squat facing the wall, 9–11 ft away. Ball in your throwing hand, inside your glove."),
  "sb": ("jp", "9–11 ft", "Catcher's stance facing the wall, 9–11 ft away. Throwing-side foot steps behind your glove foot, then throw."),
  "wtd": ("walk", "16 ft", "Start about 16 ft back, facing the wall. Walk 2 steps into your footwork and throw from about 9–11 ft."),
  "mbscoop": ("side", "7–9 ft", "Sideways to the field net, glove side toward it, 7–9 ft away. Ball at your back hip.", "net"),
@@ -314,7 +316,7 @@ N2K = {"Stretch, then light run": "stretch", "Foam roll": "foam", "J-band series
        "Waiter walks": "waiter", "Band external rotation": "er", "Band internal rotation": "ir", "Band Y's and T's": "iyt",
        "Band wrist flexion and extension": "wrist", "Band forearm twists": "twist", "Open books": "ob", "Band I's, Y's, T's": "iyt", "90/90 rotations": "r9090", "Throwdowns": "tdown", "90/90 hip switches": "hip90", "World's greatest stretch": "wgs", "Half-kneeling hip flexor stretch": "hflex", "Quadruped T-spine rotation": "tspine", "Lateral lunges": "latl", "Standing hip CARs": "hcar", "Cross-body shoulder stretch": "cb"}
 N2K.update({v: k for k, v in NAMES.items()})
-N2K.update({"Long toss stretch-out": "lt", "Rotational scoop toss": "mbscoop", "Overhead slams": "mbslam", "Step-behind shot put": "mbshot"})
+N2K.update({"Squat-and-fire throws": "saf", "Long toss stretch-out": "lt", "Rotational scoop toss": "mbscoop", "Overhead slams": "mbslam", "Step-behind shot put": "mbshot"})
 
 
 LT = {"Ramp": "90 ft", "Build": "100–120 ft", "Build 2": "120–140 ft", "Peak": "140–150 ft",
@@ -441,6 +443,13 @@ if __name__ == "__main__":
                             for k in ("txt", "note"):
                                 if isinstance(it.get(k), str):
                                     it[k] = it[k].replace("1 kg", "32 oz gray or 21 oz blue")
+        if l == "Sydney":  # walking windups become squat-and-fire throws
+            for w in data["weeks"]:
+                for d in w["days"]:
+                    for b in d.get("blocks", []):
+                        for it in b["items"]:
+                            if it["n"] == "Walking windups":
+                                it["n"] = "Squat-and-fire throws"
         data["goals"] = GOALS.get(l)
         data = post(data)
         slug = urllib.parse.quote(l.lower().replace("é", "e"))
