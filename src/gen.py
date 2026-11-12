@@ -34,7 +34,7 @@ CLAD = [(3, "10"), (3, "8"), (2, "5")]  # Campion: ~50-55 throws a session
 NAMES = {"rev": "Reverse throws", "hk": "Half-kneeling throws", "rock": "Rocker throws", "roll": "Roll-ins",
          "drop": "Drop backs", "step": "Step-backs", "ww": "Walking windups",
          "kd": "Knee-down throws", "ex": "Exchange throws", "jp": "Jab-pivot throws",
-         "ssr": "Secondary-stance rockers", "wtd": "Walking throwdowns", "sb": "Step-behind throws"}
+         "ssr": "Secondary-stance rockers", "wtd": "Walking throwdowns", "sb": "Step-behind throws", "saf": "Squat-and-fire throws"}
 BLOCK = {1: ("roll", ("hk", "rock")), 2: ("roll", ("drop", "step")), 3: ("rock", ("roll", "drop")),
          4: ("step", ("roll", "hk")), 5: ("roll", ("rock", "step"))}
 
@@ -68,7 +68,7 @@ def plyo_item(key, tier, m, core_only=False, catcher=False):
 
 def plist_for(w, core_only, catcher, wed):
     if catcher:
-        return ["rev", "kd", "ex", "sb"] if wed and core_only else ["rev", "kd", "ex", "sb", "ssr"]
+        return ["rev", "kd", "ex", "sb"] if wed and core_only else ["rev", "kd", "ex", "sb", "saf"]
     c2, (r1, r2) = BLOCK[blk(w)]
     return ["rev", c2, "ww"] if core_only else ["rev", r1, c2, r2, "ww"]
 
